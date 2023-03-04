@@ -1,58 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="391dp"
-        android:layout_height="710dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <!-- ImageView: Backround -->
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-100dp"
+        android:src="@drawable/top_background"
+        android:layout_centerHorizontal="true"/>
 
-        <!-- Button: Main Create Account -->
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:src="@drawable/buddylogo"
-            app:layout_constraintBottom_toTopOf="@+id/buttonLogin"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.153" />
+    <!-- ImageView: Logo -->
+    <ImageView
+        android:id="@+id/LogoMain"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:src="@drawable/buddylogo"
+        android:padding="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"/>
 
-        <Button
-            android:id="@+id/buttonRegisterMain"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_baseline_login_24"
-            android:text="@string/buttonRegister"
-            android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.909" />
+    <!-- TextView: Find A Buddy! -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/LogoMain"
+        android:fontFamily="@font/alata"
+        android:text="@string/textViewUnderLogo"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="30sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
 
         <!-- Button: Main Login -->
-
         <Button
             android:id="@+id/buttonLogin"
-            android:layout_width="250dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_baseline_login_24"
-            android:textAlignment="center"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="380dp"
+            android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
+            android:paddingLeft="120dp"
+            android:paddingRight="130dp"
+            android:fontFamily="@font/alata"
             android:text="@string/buttonLogin"
-            app:layout_constraintBottom_toTopOf="@+id/buttonRegisterMain"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.981" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="23sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- TextView: Forgot Your pass -->
+        <TextView
+            android:id="@+id/textViewForgotPass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonLogin"
+            android:text="Forgot your Password?"
+            android:textAlignment="textEnd"
+            android:textColor="#04336a" />
+
+        <!-- View: Space -->
+        <View
+            android:id="@+id/viewSpace"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginTop="82dp"
+            android:background="#707070"
+            android:layout_below="@+id/textViewForgotPass"/>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/viewSpace">
+
+            <!-- Button: Google LogIn -->
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/buttonGoogleLogin"
+                android:backgroundTint="#bcbcbc"
+                android:textAllCaps="false"
+                android:drawableLeft="@drawable/google"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#636363"
+                android:layout_marginEnd="10dp" />
+
+            <!-- Button: FaceBook LogIn -->
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/buttonFaceBookLogin"
+                android:backgroundTint="#bcbcbc"
+                android:textAllCaps="false"
+                android:drawableLeft="@drawable/facebook"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#636363"
+                android:layout_marginStart="10dp"/>
+        </LinearLayout>
+
+        <!-- TextView: Register -->
+        <TextView
+            android:id="@+id/textViewRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linearLayoutLogin"
+            android:text="@string/textViewReigsterNow"
+            android:layout_marginTop="10dp"
+            android:textAlignment="center"
+            android:textColor="#04336a" />
+
+<!--        &lt;!&ndash; Button: Main Create Account &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/buttonRegisterMain"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentBottom="true"-->
+<!--            android:layout_marginBottom="50dp"-->
+<!--            android:text="@string/buttonRegister"-->
+<!--            android:textAlignment="center"-->
+<!--            android:textAllCaps="false"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="23sp"/>-->
+
+    </RelativeLayout>
+
+
+
+
+</RelativeLayout>
