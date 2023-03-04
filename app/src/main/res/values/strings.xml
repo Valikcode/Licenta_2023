@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Buddy</string>
+    <string name="buttonRegister">Create Account</string>
+    <string name="buttonLogin">Login</string>
+    <string name="textViewRegister">Register</string>
+    <string name="editTextEmailHint">E-Mail</string>
+    <string name="editTextPasswordHint">Password</string>
+    <string name="textViewProfile">Profile</string>
+    <string name="textViewAlreadyUser">Already have an account? Login</string>
+    <string name="textViewLogin">Login</string>
+    <string name="textViewNotAUser">Don\'t have an account? Sing up!</string>
 </resources>
