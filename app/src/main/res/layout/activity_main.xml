@@ -15,26 +15,44 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <!-- Button: Main Create Account -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:src="@drawable/buddylogo"
+            app:layout_constraintBottom_toTopOf="@+id/buttonLogin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.153" />
+
         <Button
             android:id="@+id/buttonRegisterMain"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_baseline_login_24"
             android:text="@string/buttonRegister"
+            android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.913"
-            tools:layout_editor_absoluteX="0dp" />
+            app:layout_constraintVertical_bias="0.909" />
 
         <!-- Button: Main Login -->
+
         <Button
             android:id="@+id/buttonLogin"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_baseline_login_24"
+            android:textAlignment="center"
             android:text="@string/buttonLogin"
             app:layout_constraintBottom_toTopOf="@+id/buttonRegisterMain"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.982"
-            tools:layout_editor_absoluteX="0dp" />
+            app:layout_constraintVertical_bias="0.981" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
