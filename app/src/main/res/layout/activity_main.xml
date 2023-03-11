@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="380dp"
+            android:layout_marginTop="400dp"
             android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
             android:paddingLeft="120dp"
             android:paddingRight="130dp"
@@ -57,16 +57,6 @@
             android:textColor="@color/white"
             android:textSize="23sp" />
 
-        <!-- TextView: Forgot Your pass -->
-        <TextView
-            android:id="@+id/textViewForgotPass"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonLogin"
-            android:text="Forgot your Password?"
-            android:textAlignment="textEnd"
-            android:textColor="#04336a" />
-
         <!-- View: Space -->
         <View
             android:id="@+id/viewSpace"
@@ -75,9 +65,9 @@
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="32dp"
-            android:layout_marginTop="82dp"
+            android:layout_marginTop="100dp"
             android:background="#707070"
-            android:layout_below="@+id/textViewForgotPass"/>
+            android:layout_below="@+id/buttonLogin"/>
 
         <LinearLayout
             android:id="@+id/linearLayoutLogin"
