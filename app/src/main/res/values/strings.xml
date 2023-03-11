@@ -11,7 +11,7 @@
     <string name="textViewAlreadyUser">Already have an account? Login</string>
     <string name="textViewLogin">LogIn</string>
     <string name="textViewUnderLogo">Find a Buddy!</string>
-    <string name="textViewNotAUser">Don\'t have an account? Sing up!</string>
     <string name="textViewReigsterNow">You don\`t have an account? Sing up now!</string>
+    <string name="textViewForgotPass">Forgot your Password? Recover it now!</string>
 
 </resources>

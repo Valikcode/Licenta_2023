@@ -4,14 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     // Views
     EditText editTextEmail, editTextPassword;
     Button buttonLoginSec;
-    TextView textViewNotHaveAccount;
+    TextView textViewNotHaveAccount, textViewRecoverPass;
 
     // Declare an instance of FirebeaseAuth
     private FirebaseAuth mAuth;
@@ -45,8 +49,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-//        // Ascund Action Bar de pe Splah Screen
-//        getSupportActionBar().hide();
+        // Ascund Action Bar de pe Splah Screen
+        //getSupportActionBar().hide();
         // Actionbar and its title
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("Login");
@@ -63,6 +67,7 @@ public class LoginActivity extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editTextPasswordLogin);
         buttonLoginSec = findViewById(R.id.buttonLoginSec);
         textViewNotHaveAccount = findViewById(R.id.textViewNotUser);
+        textViewRecoverPass = findViewById(R.id.textViewForgotPass);
 
         // Login button click Handler
         buttonLoginSec.setOnClickListener(new View.OnClickListener() {
@@ -91,14 +96,94 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Recover password textView click Handler
+        textViewRecoverPass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showRecoverPasswordDialog();
+            }
+        });
+
         // Init progress dialog
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(("Logging In...."));
-
     }
 
+    // Recover pass dialog
+    private void showRecoverPasswordDialog() {
+        // AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Recover Password");
+
+        // set layout linear layout
+        LinearLayout linearLayout = new LinearLayout(this);
+
+        // Views to set in the dialog
+        EditText editTextEmail = new EditText(this);
+        editTextEmail.setHint("E-Mail");
+        editTextEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+        // Sets the min witdh of a EditView to fit a text of n 'M' letters regardless
+        // of the actual text extensions and text sieze.
+        editTextEmail.setMaxEms(16);
+
+        linearLayout.addView(editTextEmail);
+        linearLayout.setPadding(10,10,10,10);
+
+        builder.setView(linearLayout);
+
+        // Buttons recover
+        builder.setPositiveButton("Recover", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // input email
+                String email = editTextEmail.getText().toString().trim();
+                beginRecovery(email);
+            }
+        });
+
+        // Buttons cancel
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // dismiss dialog
+                dialogInterface.dismiss();
+            }
+        });
+
+        // show dialog
+        builder.create().show();
+    }
+
+    // Pass recovery method
+    private void beginRecovery(String email) {
+        // Show progress dialog
+        progressDialog.setMessage(("Sending recovery E-Mail..."));
+        progressDialog.show();
+
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                progressDialog.dismiss();
+                if(task.isSuccessful()){
+                    Toast.makeText(LoginActivity.this, "Email sent!", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(LoginActivity.this, "Failed, make sure an account exist on this email!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+                // get and show proper error message
+                Toast.makeText(LoginActivity.this, "" + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    // Login method
     private void loginUser(String email, String pass) {
         // Show progress dialog
+        progressDialog.setMessage(("Logging In..."));
         progressDialog.show();
         mAuth.signInWithEmailAndPassword(email,pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -131,6 +216,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    // Right Up Corner menu
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed(); // Go to the previous activity
