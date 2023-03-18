@@ -6,20 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.identity.BeginSignInRequest;
-import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -29,6 +25,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -126,12 +126,30 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             FirebaseUser user = mAuth.getCurrentUser();
+                            // Get user email and uid from auth
+                            String email = user.getEmail();
+                            String uid = user.getUid();
+                            // When user is registred store user info in firebase realtime database
+                            // too using HashMap
+                            HashMap<Object, String> hashMap = new HashMap<>();
+                            // Put info in hashMap
+                            hashMap.put("email",email);
+                            hashMap.put("uid",uid);
+                            hashMap.put("name",""); // will add later ( e.g. edit profile)
+                            hashMap.put("phone",""); // will add later ( e.g. edit profile)
+                            hashMap.put("image",""); // will add later ( e.g. edit profile)
+                            // Firebase DataBase instance
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            // Path to store user data named "Users"
+                            DatabaseReference reference = database.getReference("Users");
+                            // Put data within hashMap in database
+                            reference.child(uid).setValue(hashMap);
 
                             // Show user email in toast
                             Toast.makeText(MainActivity.this, "Login Succesfull: " +user.getEmail(), Toast.LENGTH_SHORT).show();
 
                             // User is logged in, so start ProfileActivity
-                            startActivity(new Intent(MainActivity.this,ProfileActivity.class));
+                            startActivity(new Intent(MainActivity.this, DashboardActivity.class));
                             finish();
                         }
                     }

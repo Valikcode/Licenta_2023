@@ -195,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
                             // User is logged in, so start ProfileActivity
-                            startActivity(new Intent(LoginActivity.this,ProfileActivity.class));
+                            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
                             finish();
                         } else {
                             // Dismiss progress dialog
