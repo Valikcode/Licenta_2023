@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_below="@+id/navigation"/>
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/navigation"/>
 
 
     <!-- Bottom Navigation : show menu -->
@@ -21,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:background="?android:attr/windowBackground"
         app:menu="@menu/menu_nav"/>
 

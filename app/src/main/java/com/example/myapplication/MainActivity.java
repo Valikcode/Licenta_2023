@@ -141,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
                                 hashMap.put("email",email);
                                 hashMap.put("uid",uid);
                                 hashMap.put("name",""); // will add later ( e.g. edit profile)
+                                hashMap.put("onlineStatus","online"); // will add later ( e.g. edit profile)
+                                hashMap.put("typingTo","noOne"); // will add later ( e.g. edit profile)
                                 hashMap.put("phone",""); // will add later ( e.g. edit profile)
                                 hashMap.put("image",""); // will add later ( e.g. edit profile)
                                 hashMap.put("cover",""); // will add later ( e.g. edit profile)

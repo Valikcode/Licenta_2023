@@ -8,7 +8,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +35,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -114,6 +120,36 @@ public class ChatActivity extends AppCompatActivity {
                     // Get data
                     String name = ds.child("name").getValue().toString();
                     hisImage = ds.child("image").getValue().toString();
+                    String typingStatus = ds.child("typingTo").getValue().toString();
+
+                    // Check typing status
+                    if(typingStatus.equals(myUID)){
+                        userStatusTv.setText("typing...");
+                    } else {
+                        // Get value of onlineStatus
+                        String onlineStatus = ds.child("onlineStatus").getValue().toString();
+                        if(onlineStatus.equals("online")){
+                            userStatusTv.setText(onlineStatus);
+                        } else {
+                            // Convert timestamp to proper time date
+
+                            Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
+                            calendar.setTimeInMillis(Long.parseLong(onlineStatus));
+                            Date date = calendar.getTime();
+
+                            long timeDiffMillis = System.currentTimeMillis() - date.getTime();
+
+                            if(timeDiffMillis >= 86400000){
+                                // Convert timestamp to dd/mm/yyyy hh:mm
+                                String time = DateFormat.format("dd/MM/yyyy HH:mm", calendar).toString();
+                                userStatusTv.setText("Last seen at: " + time);
+                            } else {
+                                // Convert timestamp to hh:mm
+                                String time = DateFormat.format("HH:mm", calendar).toString();
+                                userStatusTv.setText("Last seen at: " + time);
+                            }
+                        }
+                    }
 
                     // Set data
                     nameTv.setText(name);
@@ -147,6 +183,28 @@ public class ChatActivity extends AppCompatActivity {
                     // text not empty
                     sendMessage(message);
                 }
+            }
+        });
+
+        // Check edit text change listner
+        messageEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(charSequence.toString().trim().length() == 0){
+                    checkTypingStatus("noOne");
+                } else {
+                    checkTypingStatus(hisUID); // UID of receiver
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
 
@@ -197,6 +255,8 @@ public class ChatActivity extends AppCompatActivity {
                     adapterChat.notifyDataSetChanged();
                     // Set adapter to RecyclerView
                     recyclerView.setAdapter(adapterChat);
+                    // Scroll RecyclerView to the last position after adapter is updated
+                    recyclerView.scrollToPosition(chatList.size() - 1);
                 }
             }
 
@@ -250,17 +310,49 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    private void checkOnlineStatus(String status){
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(myUID);
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("onlineStatus", status);
+
+        // Update value of onlineStatus of the current user
+        databaseReference.updateChildren(hashMap);
+    }
+
+    private void checkTypingStatus(String typing){
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(myUID);
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("typingTo", typing);
+
+        // Update value of onlineStatus of the current user
+        databaseReference.updateChildren(hashMap);
+    }
+
     @Override
     protected void onStart() {
         checkUserStatus();
-
+        // set Online
+        checkOnlineStatus("online");
         super.onStart();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Get timestamp
+        String timestamp = String.valueOf(System.currentTimeMillis());
+
+        // set Offline with last seen time stamp
+        checkOnlineStatus(timestamp);
+        checkTypingStatus("noOne");
         databaseReference.removeEventListener(seenListener);
+    }
+
+    @Override
+    protected void onResume() {
+        // set Online
+        checkOnlineStatus("online");
+        super.onResume();
     }
 
     @Override

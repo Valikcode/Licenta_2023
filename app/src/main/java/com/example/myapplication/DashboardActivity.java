@@ -52,6 +52,20 @@ public class DashboardActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.action_profile){
+            // profile fragment transaction
+            actionBar.setTitle("Profile"); // Change actionbar title
+            ProfileFragment profileFragment = new ProfileFragment();
+            FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction2.replace(R.id.content, profileFragment, "");
+            fragmentTransaction2.commit();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener selectedListner =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -65,14 +79,6 @@ public class DashboardActivity extends AppCompatActivity {
                             FragmentTransaction fragmentTransaction1 = getSupportFragmentManager().beginTransaction();
                             fragmentTransaction1.replace(R.id.content, homeFragment, "");
                             fragmentTransaction1.commit();
-                            return true;
-                        case R.id.nav_profile:
-                            // profile fragment transaction
-                            actionBar.setTitle("Profile"); // Change actionbar title
-                            ProfileFragment profileFragment = new ProfileFragment();
-                            FragmentTransaction fragmentTransaction2 = getSupportFragmentManager().beginTransaction();
-                            fragmentTransaction2.replace(R.id.content, profileFragment, "");
-                            fragmentTransaction2.commit();
                             return true;
                         case R.id.nav_users:
                             // users fragment transaction

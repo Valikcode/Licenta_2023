@@ -1,5 +1,7 @@
 package com.example.myapplication.models;
 
+import com.google.firebase.database.PropertyName;
+
 public class ModelChat {
     String message;
     String receiver;
@@ -50,10 +52,12 @@ public class ModelChat {
         this.timestamp = timestamp;
     }
 
-    public boolean getSeen() {
+    @PropertyName("isSeen")
+    public boolean isSeen() {
         return isSeen;
     }
 
+    @PropertyName("isSeen")
     public void setSeen(boolean seen) {
         isSeen = seen;
     }

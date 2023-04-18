@@ -1,12 +1,19 @@
 package com.example.myapplication.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,9 +23,16 @@ import com.example.myapplication.models.ModelChat;
 import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,7 +75,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         // Convert timestamp to hh:mm
         Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(timeStamp));
-        String time = DateFormat.format("hh:mm", calendar).toString();
+        String time = DateFormat.format("HH:mm", calendar).toString();
 
         // Set data
         holder.messageTv.setText(message);
@@ -72,17 +86,114 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
 
         }
 
-        // Set seen / delivered stauts of message
+        // Longpress to show delete dialog
+        holder.messageLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // Check if the message is already deleted
+                String messageText = chatList.get(holder.getAdapterPosition()).getMessage();
+                if (messageText.equals("This message was deleted...")) {
+                    return true; // Do not show the dialog
+                }
+
+                // Show delete message confirm dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Delete");
+                builder.setMessage("Are you sure you want to delete this message?");
+
+                // Delete button
+                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        deleteMessage(holder.getAdapterPosition());
+                    }
+                });
+                // Cancel delete button
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Dismiss dialog
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                // Set button styles
+                AlertDialog dialog = builder.create();
+                dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialogInterface) {
+                        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                        positiveButton.setTextColor(Color.BLACK); // set text color
+                        negativeButton.setTextColor(Color.BLACK);
+                    }
+                });
+
+
+                // Create and show dialog
+                dialog.show();
+
+                return true;
+            }
+        });
+
+        // Set seen / delivered status of message
         if(position == chatList.size()-1){
-            if(chatList.get(position).getSeen()){
+            if(chatList.get(position).isSeen()){
                 holder.isSeenTv.setText("Seen");
             } else {
                 holder.isSeenTv.setText("Delivered");
             }
         }
         else {
-            holder.isSeenTv.setText("Sending...");
+            holder.isSeenTv.setVisibility(View.GONE);
         }
+    }
+
+    private void deleteMessage(int position) {
+        String myUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Logic:
+        // Get timestamp of clicked message
+        // Compare the timestamp of the clicked message with all messages in Chats
+        // Where both values matches delete that message
+        // This will allow the sender to delete his and receiver`s message
+
+        String msgTimeStamp = chatList.get(position).getTimestamp();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chats");
+        Query query = databaseReference.orderByChild("timestamp").equalTo(msgTimeStamp);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    // If you want to allow sender to delete only his message then
+                    // compare sender value with current user`s UID
+                    // if they match it means that it`s the message of sender that is trying to delete
+                    if (ds.child("sender").getValue().equals(myUID)){
+                        // We can do one of two things here
+                        // 1) Remove the message from chats
+                        // 2) Set the value of the message to "This message was deleted..."
+
+                        // 1)
+                        //ds.getRef().removeValue();
+
+                        // 2)
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("message","This message was deleted...");
+                        ds.getRef().updateChildren(hashMap);
+
+                        Toast.makeText(context, "Message deleted!", Toast.LENGTH_SHORT).show();
+                   
+                    } else {
+                        Toast.makeText(context, "You can only delete your message", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
@@ -109,6 +220,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         TextView messageTv;
         TextView timeTv;
         TextView isSeenTv;
+        LinearLayout messageLayout; // for click listener to show delete
 
         public MyHolder(@NonNull View itemView) {
             super(itemView);
@@ -118,6 +230,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             messageTv = itemView.findViewById(R.id.messageTv);
             timeTv = itemView.findViewById(R.id.timeTv);
             isSeenTv = itemView.findViewById(R.id.isSeenTv);
+            messageLayout = itemView.findViewById(R.id.messageLayout);
 
         }
     }
