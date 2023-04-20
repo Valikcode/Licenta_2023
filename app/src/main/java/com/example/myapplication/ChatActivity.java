@@ -42,6 +42,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -129,6 +130,7 @@ public class ChatActivity extends AppCompatActivity {
         // Init FirebaseAuth instance
         firebaseAuth = FirebaseAuth.getInstance();
 
+
         // Init FirebaseDatabase instance and reference
         firebaseDatabase = FirebaseDatabase.getInstance();
         usersDbRef = firebaseDatabase.getReference("Users");
@@ -210,6 +212,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 // Reset EditText after sending message
                 messageEt.setText("");
+                String token = String.valueOf(FirebaseMessaging.getInstance().getToken());
             }
         });
 
