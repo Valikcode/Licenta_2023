@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -13,9 +14,14 @@ import com.example.myapplication.fragments.ChatListFragment;
 import com.example.myapplication.fragments.HomeFragment;
 import com.example.myapplication.fragments.ProfileFragment;
 import com.example.myapplication.fragments.UsersFragment;
+import com.example.myapplication.notifications.Token;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -25,8 +31,10 @@ public class DashboardActivity extends AppCompatActivity {
     // Views
     BottomNavigationView navigationView;
 
-
     ActionBar actionBar;
+
+    String mUID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +58,22 @@ public class DashboardActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.content, homeFragment, "");
         fragmentTransaction.commit();
 
+        checkUserStatus();
+
+        // Update token
+        updateToken(String.valueOf(FirebaseMessaging.getInstance().getToken()));
+    }
+
+    @Override
+    protected void onResume() {
+        checkUserStatus();
+        super.onResume();
+    }
+
+    public void updateToken(String token){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Tokens");
+        Token mToken = new Token(token);
+        reference.child(mUID).setValue(mToken);
     }
 
 
@@ -109,6 +133,13 @@ public class DashboardActivity extends AppCompatActivity {
             // User is signed in => stay here
             // Set email of logged in user
             //textViewProfil.setText(user.getEmail());
+            mUID = user.getUid();
+
+            // Save the uid of currently signed in user in shared preferences
+            SharedPreferences sharedPreferences = getSharedPreferences("SP_USER",MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("Current_USERID", mUID);
+            editor.apply();
         }else {
             // User is not signed in => go to main activity
             startActivity(new Intent(DashboardActivity.this, MainActivity.class));
