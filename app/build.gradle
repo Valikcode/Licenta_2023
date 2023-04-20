@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.example.myapplication"
         minSdk 23
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -41,9 +41,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:20.1.0'
     implementation 'com.google.firebase:firebase-messaging:23.1.2'
 
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.android.volley:volley:1.2.1'
+
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     // Google Sign In Library
     // Import the BoM for the Firebase platform

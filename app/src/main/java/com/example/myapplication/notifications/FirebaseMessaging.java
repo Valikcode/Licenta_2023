@@ -18,9 +18,11 @@ import androidx.core.app.NotificationCompat;
 import com.example.myapplication.ChatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.RemoteMessage;
 
-public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
+public class FirebaseMessaging extends com.google.firebase.messaging.FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
@@ -59,8 +61,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         PendingIntent pendingIntent = PendingIntent.getActivity(this, i, intent, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).
-                setSmallIcon(Integer.parseInt(icon))
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(Integer.parseInt(icon))
                 .setContentText(body)
                 .setContentTitle(title)
                 .setAutoCancel(true)
@@ -102,5 +104,24 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             j=i;
         }
         notification1.getManager().notify(j,builder.build());
+    }
+
+    @Override
+    public void onNewToken(@NonNull String token) {
+        super.onNewToken(token);
+        // Update user token
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null){
+            // Signed in, update token
+            updateToken(token);
+        }
+    }
+
+    private void updateToken(String tokenRefresh) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Tokens");
+        Token token = new Token(tokenRefresh);
+        ref.child(user.getUid()).setValue(token);
+
     }
 }

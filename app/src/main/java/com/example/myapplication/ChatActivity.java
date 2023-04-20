@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,13 +22,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.myapplication.adapters.AdapterChat;
 import com.example.myapplication.models.ModelChat;
 import com.example.myapplication.models.ModelUser;
-import com.example.myapplication.notifications.APIService;
-import com.example.myapplication.notifications.Client;
 import com.example.myapplication.notifications.Data;
-import com.example.myapplication.notifications.Response;
 import com.example.myapplication.notifications.Sender;
 import com.example.myapplication.notifications.Token;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +42,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,9 +54,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -79,8 +86,10 @@ public class ChatActivity extends AppCompatActivity {
     String myUID;
     String hisImage;
 
-    APIService apiService;
-    boolean notify = false;
+    // Volley request queue for notification
+    private RequestQueue requestQueue;
+
+    private boolean notify = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,15 +109,15 @@ public class ChatActivity extends AppCompatActivity {
         messageEt = findViewById(R.id.messageEt);
         sendBtn = findViewById(R.id.sendBtn);
 
+        // Request queue
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
         // Layout (LinearLayout) for RecyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         // recyclerView properties
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
-
-        // Create api Service
-        apiService = Client.getRetrofit("https://fcm.googleapis.com/").create(APIService.class);
 
         // On clicking a user from userList we have passed that user`s UID using intent
         // So we get that uit here to get the profile picture, name and start
@@ -204,7 +213,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        // Check edit text change listner
+        // Check edit text change listener
         messageEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -333,21 +342,44 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()){
                     Token token = dataSnapshot.getValue(Token.class);
-                    Data data = new Data(myUID, name + " : " + message, "New Message", hisUID, R.drawable.ic_default_img);
+                    Data data = new Data(myUID, name + ": " + message, "New Message", hisUID, R.drawable.ic_default_img);
 
                     Sender sender = new Sender(data, token.getToken());
-                    apiService.sendNotification(sender)
-                            .enqueue(new Callback<Response>() {
-                                @Override
-                                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
-                                    Toast.makeText(ChatActivity.this, "" + response.message(), Toast.LENGTH_SHORT).show();
-                                }
 
-                                @Override
-                                public void onFailure(Call<Response> call, Throwable t) {
+                    // FCM json object request
+                    try {
+                        JSONObject senderJsonObj = new JSONObject(new Gson().toJson(sender));
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send",
+                                senderJsonObj, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                // Response of the request
+                                Log.d("JSON_RESPONSE", "onResponse: " + response.toString());
 
-                                }
-                            });
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("JSON_RESPONSE", "onResponse: " + error.toString());
+
+                            }
+                        }){
+                            @Override
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                // Put Params
+                                Map<String, String> headers = new HashMap<>();
+                                headers.put("Content-Type", "application/json");
+                                headers.put("Authorization", "key=AAAAzGSOk5c:APA91bGLhoywuJlK32zOtI_7lgLbTVFOtID6bUjt50n2o2L1ZZjaF0GmcE_hn7Ra2fHn8fEsBF8_pxMRG00JF8gksRs62yxbKQev3QQRdrjmp4XT_fUpt8Y1D-4Eb_KJ8CudOI_91BO7");
+
+                                return headers;
+                            }
+                        };
+                        // Add this request to queue
+                        requestQueue.add(jsonObjectRequest);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
