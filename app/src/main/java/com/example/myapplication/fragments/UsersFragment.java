@@ -1,6 +1,7 @@
 package com.example.myapplication.fragments;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
@@ -39,6 +42,8 @@ public class UsersFragment extends Fragment {
     RecyclerView recyclerView;
     AdapterUsers adapterUsers;
     List<ModelUser> usersList;
+    SeekBar seekBar;
+    TextView distanceValueTv;
 
     // Firebase auth
     FirebaseAuth firebaseAuth;
@@ -52,6 +57,32 @@ public class UsersFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_users, container, false);
+
+        // Init Views
+        seekBar = view.findViewById(R.id.seekBar);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            seekBar.setMin(5);
+        }
+        distanceValueTv = view.findViewById(R.id.distanceValueTv);
+        distanceValueTv.setText(String.valueOf(seekBar.getProgress()));
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                distanceValueTv.setText(String.valueOf(seekBar.getProgress()));
+                if(seekBar.getProgress() == 100){
+                    distanceValueTv.setText("Anywhere");
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
 
         // Init firebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
@@ -70,6 +101,7 @@ public class UsersFragment extends Fragment {
 
         return view;
     }
+
 
     private void getAllUsers() {
         // Get current user
