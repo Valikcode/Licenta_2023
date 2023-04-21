@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.example.myapplication"
         minSdk 23
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -39,6 +39,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:21.3.0'
     implementation 'com.google.firebase:firebase-database:20.2.0'
     implementation 'com.google.firebase:firebase-storage:20.1.0'
+    implementation 'com.google.firebase:firebase-messaging:23.1.2'
+
+    implementation 'com.android.volley:volley:1.2.1'
+
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     // Google Sign In Library
     // Import the BoM for the Firebase platform
@@ -55,6 +60,7 @@ dependencies {
 
     // CircularImageView
     implementation 'com.github.AtifSayings:CircularImageView:1.0.2'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'
 
 
     testImplementation 'junit:junit:4.13.2'
