@@ -348,6 +348,7 @@ public class ChatActivity extends AppCompatActivity {
                     Data data = new Data(myUID, name + ": " + message, "New Message", hisUID, R.drawable.ic_default_img);
 
                     Sender sender = new Sender(data, token.getToken());
+                    Log.d("TOKEN", token.getToken());
 
                     // FCM json object request
                     try {

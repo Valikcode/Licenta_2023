@@ -25,6 +25,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 public class FirebaseMessaging extends FirebaseMessagingService {
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
@@ -94,7 +95,7 @@ public class FirebaseMessaging extends FirebaseMessagingService {
         bundle.putString("hisUid", user);
         intent.putExtras(bundle);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, i, intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, i, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         Uri defSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -111,7 +112,9 @@ public class FirebaseMessaging extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d("FCM", "New token: " + token);
+
+        Log.d("TOKEN_NEW", "New token received: " + token);
+
         // Update user token
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null){

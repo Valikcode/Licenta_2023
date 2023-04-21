@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.myapplication.fragments.ChatListFragment;
@@ -15,6 +16,8 @@ import com.example.myapplication.fragments.HomeFragment;
 import com.example.myapplication.fragments.ProfileFragment;
 import com.example.myapplication.fragments.UsersFragment;
 import com.example.myapplication.notifications.Token;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,9 +62,6 @@ public class DashboardActivity extends AppCompatActivity {
         fragmentTransaction.commit();
 
         checkUserStatus();
-
-        // Update token
-        updateToken(String.valueOf(FirebaseMessaging.getInstance().getToken()));
     }
 
     @Override
@@ -75,6 +75,7 @@ public class DashboardActivity extends AppCompatActivity {
         Token mToken = new Token(token);
         reference.child(mUID).setValue(mToken);
     }
+
 
 
     @Override
@@ -140,6 +141,19 @@ public class DashboardActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("Current_USERID", mUID);
             editor.apply();
+
+            // Update token
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                @Override
+                public void onComplete(@NonNull Task<String> task) {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        String registrationToken = task.getResult();
+                        updateToken(registrationToken);
+                    } else {
+                        // Handle error
+                    }
+                }
+            });
         }else {
             // User is not signed in => go to main activity
             startActivity(new Intent(DashboardActivity.this, MainActivity.class));
