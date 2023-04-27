@@ -146,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
                                 hashMap.put("phone",""); // will add later ( e.g. edit profile)
                                 hashMap.put("image",""); // will add later ( e.g. edit profile)
                                 hashMap.put("cover",""); // will add later ( e.g. edit profile)
+                                hashMap.put("latitude","");
+                                hashMap.put("longitude","");
                                 // Firebase DataBase instance
                                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                                 // Path to store user data named "Users"

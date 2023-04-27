@@ -3,11 +3,13 @@ package com.example.myapplication.models;
 public class ModelUser {
 
      // Use same name as in firebase database
-    String name, email, search, phone, image, cover, uid;
+    String name, email, search, phone, image, cover, uid, onlineStatus, typingTo;
+    Double latitude, longitude;
 
-    public ModelUser() {}
+    public ModelUser() {
+    }
 
-    public ModelUser(String name, String email, String search, String phone, String image, String cover, String uid) {
+    public ModelUser(String name, String email, String search, String phone, String image, String cover, String uid, String onlineStatus, String typingTo, Double latitude, Double longitude) {
         this.name = name;
         this.email = email;
         this.search = search;
@@ -15,6 +17,10 @@ public class ModelUser {
         this.image = image;
         this.cover = cover;
         this.uid = uid;
+        this.onlineStatus = onlineStatus;
+        this.typingTo = typingTo;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public String getName() {
@@ -71,5 +77,37 @@ public class ModelUser {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getOnlineStatus() {
+        return onlineStatus;
+    }
+
+    public void setOnlineStatus(String onlineStatus) {
+        this.onlineStatus = onlineStatus;
+    }
+
+    public String getTypingTo() {
+        return typingTo;
+    }
+
+    public void setTypingTo(String typingTo) {
+        this.typingTo = typingTo;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }
