@@ -1,6 +1,7 @@
 package com.example.myapplication.fragments;
 
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,6 +75,8 @@ public class UsersFragment extends Fragment {
                 if(seekBar.getProgress() == 100){
                     distanceValueTv.setText("Anywhere");
                 }
+                // getAll users
+                getAllUsers();
             }
 
             @Override
@@ -96,8 +100,7 @@ public class UsersFragment extends Fragment {
         // Init user list
         usersList = new ArrayList<>();
 
-        // getAll users
-        getAllUsers();
+
 
         return view;
     }
@@ -115,14 +118,21 @@ public class UsersFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 usersList.clear();
+
+                double currLat=snapshot.child(fUser.getUid()).child("latitude").getValue(Double.class);
+                double currLong=snapshot.child(fUser.getUid()).child("longitude").getValue(Double.class);
+
                 for(DataSnapshot ds: snapshot.getChildren()){
                     ModelUser modelUser = ds.getValue(ModelUser.class);
-
-                    // Get all users except the currently singed in user
-                    if(!modelUser.getUid().equals(fUser.getUid())){
-                        usersList.add(modelUser);
+                    // Get latitude and longitude of the current user
+                    if(!modelUser.getUid().equals(fUser.getUid())) {
+                        // Get all users except the currently signed-in user
+                        // Calculate the distance between the current user and the user from the database
+                        double distance = distance(currLat, currLong, ds.child("latitude").getValue(Double.class), ds.child("longitude").getValue(Double.class));
+                        if (distance <= seekBar.getProgress() || seekBar.getProgress() == seekBar.getMax()) {
+                            usersList.add(modelUser);
+                        }
                     }
-
                     // Adapter
                     adapterUsers = new AdapterUsers(getActivity(), usersList);
 
@@ -136,6 +146,20 @@ public class UsersFragment extends Fragment {
 
             }
         });
+    }
+
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c; // convert to meters
+
+        return distance;
     }
 
     private void searchUsers(String query) {

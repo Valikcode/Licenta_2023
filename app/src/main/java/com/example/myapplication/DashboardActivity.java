@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.myapplication.fragments.ChatListFragment;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 
 public class DashboardActivity extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1 ;
     // Locatie user
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -86,12 +89,13 @@ public class DashboardActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return;
+
         }
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
@@ -99,9 +103,9 @@ public class DashboardActivity extends AppCompatActivity {
                 // Got last known location. In some rare situation this can be null
                 if (location != null) {
                     // Use the location to update the user`s current location
-                    float[] latLong = new float[2];
-                    latLong[0] = (float) location.getLatitude();
-                    latLong[1] = (float) location.getLongitude();
+                    Double[] latLong = new Double[2];
+                    latLong[0] = location.getLatitude();
+                    latLong[1] = location.getLongitude();
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(mUID);
                     HashMap<String, Object> hashMap = new HashMap<>();
                     hashMap.put("latitude", latLong[0]);
