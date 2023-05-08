@@ -14,6 +14,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -25,6 +26,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,6 +72,7 @@ public class ProfileFragment extends Fragment {
     ImageView avatarIv, coverIv;
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
+    CheckBox gamingCheckbox, educationCheckbox, gymCheckbox;
 
     // Progress dialog
     ProgressDialog pd;
@@ -87,15 +91,6 @@ public class ProfileFragment extends Fragment {
 
     // For Checking profile or cover photo
     String profileOrCover;
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -118,7 +113,7 @@ public class ProfileFragment extends Fragment {
         // Init arrays of permissions
         cameraPermissions = new String[]{Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        storagePermissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        storagePermissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         // Init Views
         avatarIv = view.findViewById(R.id.avatarIv);
@@ -127,6 +122,9 @@ public class ProfileFragment extends Fragment {
         nameTv = view.findViewById(R.id.nameTv);
         emailTv = view.findViewById(R.id.emailTv);
         phoneTv = view.findViewById(R.id.phoneTv);
+        gamingCheckbox = view.findViewById(R.id.gaming_checkbox);
+        educationCheckbox = view.findViewById(R.id.education_checkbox);
+        gymCheckbox = view.findViewById(R.id.gym_checkbox);
 
         // Init progress dialog
         pd = new ProgressDialog(getActivity());
@@ -142,6 +140,7 @@ public class ProfileFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Ckeck until required data get
                 for(DataSnapshot ds: snapshot.getChildren()){
+
                     // get data
                     String name = "" + ds.child("name").getValue();
                     String email = "" + ds.child("email").getValue();
@@ -153,6 +152,7 @@ public class ProfileFragment extends Fragment {
                     nameTv.setText(name);
                     emailTv.setText(email);
                     phoneTv.setText(phone);
+
                     try {
                         // if image is received then set
                         Picasso.get().load(image).into(avatarIv);
@@ -170,6 +170,42 @@ public class ProfileFragment extends Fragment {
                         // if there is any execption while getting image then set def.
                         Picasso.get().load(R.drawable.ic_add_image).into(coverIv);
                     }
+
+                    // CheckBoxes
+                    // Get the boolean values for the checkboxes from the database
+                    Boolean gamingBool = ds.child("gaming").getValue(Boolean.class);
+                    Boolean educationBool = ds.child("education").getValue(Boolean.class);
+                    Boolean gymBool = ds.child("gym").getValue(Boolean.class);
+
+                    // Update the checkboxes to match the values in the database
+                    gamingCheckbox.setChecked(gamingBool);
+                    educationCheckbox.setChecked(educationBool);
+                    gymCheckbox.setChecked(gymBool);
+
+                    // Add an OnCheckedChangeListener to each checkbox to update the database when the checkbox is checked or unchecked
+                    gamingCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                            userRef.child("gaming").setValue(gamingCheckbox.isChecked());
+                        }
+                    });
+
+                    educationCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                            userRef.child("education").setValue(educationCheckbox.isChecked());
+                        }
+                    });
+
+                    gymCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                            userRef.child("gym").setValue(gymCheckbox.isChecked());
+                        }
+                    });
 
                 }
             }
@@ -192,17 +228,26 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private boolean checkStoragePermission(){
+    private boolean checkStoragePermission() {
         // Check if storage permission is enabled or not
-        // return true if enabled
-        // return false if not enabled
-        boolean result = ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
+        // Return true if enabled
+        // Return false if not enabled
+        boolean result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
         return result;
     }
 
-    private void requestStoragePermission(){
-        // Request runtime storage permission
-       requestPermissions(storagePermissions, STORAGE_REQUEST_CODE);
+    private void requestStoragePermission() {
+        // Check if permission to read and write external storage is already granted
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            // Permissions are already granted, launch gallery
+            pickFromGallery();
+        } else {
+            // Permissions are not granted, request them
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    STORAGE_REQUEST_CODE);
+        }
     }
 
     private boolean checkCameraPermission(){
@@ -214,9 +259,12 @@ public class ProfileFragment extends Fragment {
         return result && result1;
     }
 
-    private void requestCameraPermission(){
-        // Request runtime storage permission
-        requestPermissions(cameraPermissions, CAMERA_REQUEST_CODE);
+    private void requestCameraPermission() {
+        if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+            Toast.makeText(getActivity(), "Camera permission is needed to take photos",
+                    Toast.LENGTH_LONG).show();
+        }
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
     }
 
     private void showEditProfileDialog() {
@@ -359,43 +407,71 @@ public class ProfileFragment extends Fragment {
         builder.create().show();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        // This method is called when the user presses Allow or Deny from permission req dialog
-        // Here we will handle permission cases ( allowed & denied )
-
-        switch (requestCode){
-            case CAMERA_REQUEST_CODE:{
-                // Picking from camera, first check if camera and storage permission are allowed or not
-                if(grantResults.length > 0){
-                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if(cameraAccepted && writeStorageAccepted){
-                        // Permisions enabled
-                        pickFromCamera();
-                    } else{
-                        // Permissions denied
-                        Toast.makeText(getActivity(), "Please enable camera & storage permissions", Toast.LENGTH_SHORT).show();
-                    }
-                }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        // This method is called when the user presses Allow or Deny from permission req dialog
+//        // Here we will handle permission cases ( allowed & denied )
+//
+//        switch (requestCode){
+//            case CAMERA_REQUEST_CODE:{
+//                // Picking from camera, first check if camera and storage permission are allowed or not
+//                if(grantResults.length > 0){
+//                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+//                    if(cameraAccepted && writeStorageAccepted){
+//                        // Permisions enabled
+//                        pickFromCamera();
+//                    } else{
+//                        // Permissions denied
+//                        Toast.makeText(getActivity(), "Please enable camera & storage permissions", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//            break;
+//            case STORAGE_REQUEST_CODE:{
+//                // Picking from gallery, first check if storage permission are allowed or not
+//                if(grantResults.length > 0){
+//                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+//                    if(writeStorageAccepted){
+//                        // Permisions enabled
+//                        pickFromGallery();
+//                    } else{
+//                        // Permissions denied
+//                        Toast.makeText(getActivity(), "Please enable storage permissions", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//            break;
+//        }
+//    }
+@Override
+public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    // Check if the request code matches either CAMERA_REQUEST_CODE or STORAGE_REQUEST_CODE
+    if (requestCode == CAMERA_REQUEST_CODE || requestCode == STORAGE_REQUEST_CODE) {
+        // Check if all permissions have been granted
+        boolean allPermissionsGranted = true;
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                allPermissionsGranted = false;
+                Toast.makeText(getContext(), "b", Toast.LENGTH_SHORT).show();
+                break;
             }
-            break;
-            case STORAGE_REQUEST_CODE:{
-                // Picking from gallery, first check if storage permission are allowed or not
-                if(grantResults.length > 0){
-                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if(writeStorageAccepted){
-                        // Permisions enabled
-                        pickFromGallery();
-                    } else{
-                        // Permissions denied
-                        Toast.makeText(getActivity(), "Please enable storage permissions", Toast.LENGTH_SHORT).show();
-                    }
-                }
+        }
+        if (allPermissionsGranted) {
+            Toast.makeText(getContext(), "a", Toast.LENGTH_SHORT).show();
+            // Permissions granted, handle accordingly
+            if (requestCode == CAMERA_REQUEST_CODE) {
+                pickFromCamera();
+            } else if (requestCode == STORAGE_REQUEST_CODE) {
+                pickFromGallery();
             }
-            break;
+        } else {
+            // Permissions denied
+            Toast.makeText(getActivity(), "Please enable permissions", Toast.LENGTH_SHORT).show();
         }
     }
+}
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -491,10 +567,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void pickFromGallery() {
-        // Pick from gallery
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryIntent.setType("image/*");
-        startActivityForResult(galleryIntent,IMAGE_PICK_GALLERY_CODE);
+        startActivityForResult(galleryIntent, IMAGE_PICK_GALLERY_CODE);
     }
 
     private  void checkUserStatus(){

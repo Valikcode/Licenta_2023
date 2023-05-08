@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
                                 // When user is registred store user info in firebase realtime database
                                 // too using HashMap
                                 HashMap<Object, String> hashMap = new HashMap<>();
+                                HashMap<Object, Boolean> hashMapBool = new HashMap<>();
                                 // Put info in hashMap
                                 hashMap.put("email",email);
                                 hashMap.put("uid",uid);
@@ -148,12 +149,19 @@ public class MainActivity extends AppCompatActivity {
                                 hashMap.put("cover",""); // will add later ( e.g. edit profile)
                                 hashMap.put("latitude","");
                                 hashMap.put("longitude","");
+                                hashMap.put("gaming","");
+                                hashMap.put("education","");
+                                hashMap.put("gym","");
+                                hashMapBool.put("gaming",false);
+                                hashMapBool.put("education",false);
+                                hashMapBool.put("gym",false);
                                 // Firebase DataBase instance
                                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                                 // Path to store user data named "Users"
                                 DatabaseReference reference = database.getReference("Users");
                                 // Put data within hashMap in database
                                 reference.child(uid).setValue(hashMap);
+                               // reference.child(uid).setValue(hashMapBool);
                             }
 
 

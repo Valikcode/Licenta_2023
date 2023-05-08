@@ -115,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
                             String uid = user.getUid();
                             // When user is registred store user info in firebase realtime database
                             // too using HashMap
-                            HashMap<Object, String> hashMap = new HashMap<>();
+                            HashMap<Object, Object> hashMap = new HashMap<>();
                             // Put info in hashMap
                             hashMap.put("email",email);
                             hashMap.put("uid",uid);
@@ -127,13 +127,15 @@ public class RegisterActivity extends AppCompatActivity {
                             hashMap.put("cover",""); // will add later ( e.g. edit profile)
                             hashMap.put("latitude","");
                             hashMap.put("longitude","");
+                            hashMap.put("gaming",false);
+                            hashMap.put("education",false);
+                            hashMap.put("gym",false);
                             // Firebase DataBase instance
                             FirebaseDatabase database = FirebaseDatabase.getInstance();
                             // Path to store user data named "Users"
                             DatabaseReference reference = database.getReference("Users");
                             // Put data within hashMap in database
                             reference.child(uid).setValue(hashMap);
-
 
                             Toast.makeText(RegisterActivity.this, "Registered...\n"+user.getEmail(), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(RegisterActivity.this, DashboardActivity.class));

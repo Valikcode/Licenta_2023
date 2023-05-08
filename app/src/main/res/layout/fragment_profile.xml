@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#F1EDED"
     tools:context=".fragments.ProfileFragment">
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <RelativeLayout
@@ -74,18 +76,70 @@
                 </LinearLayout>
             </LinearLayout>
 
+
+
         </RelativeLayout>
     </ScrollView>
+
+    <!-- Checkboxes -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Interests:"
+        android:layout_below="@id/scrollView"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:textColor="@color/black"
+        android:textSize="20dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scrollView"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_marginTop="50dp"
+        android:gravity="center">
+
+        <CheckBox
+            android:id="@+id/gaming_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gaming"
+            android:buttonTint="@color/design_default_color_primary"/>
+
+        <CheckBox
+            android:id="@+id/education_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Education"
+            android:layout_marginLeft="30dp"
+            android:buttonTint="@color/design_default_color_primary"/>
+
+        <CheckBox
+            android:id="@+id/gym_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gym"
+            android:layout_marginLeft="30dp"
+            android:buttonTint="@color/design_default_color_primary"/>
+
+    </LinearLayout>
+
+
 
     <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
+        android:backgroundTint="@color/white"
+        app:borderWidth="2dp"
+        app:backgroundTint="@color/design_default_color_primary"
+        android:tint="@color/white"
         android:src="@drawable/ic_edit_white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="10dp"
+        android:layout_margin="30dp"
         android:layout_alignParentRight="true"/>
 
 </RelativeLayout>

@@ -5,11 +5,12 @@ public class ModelUser {
      // Use same name as in firebase database
     String name, email, search, phone, image, cover, uid, onlineStatus, typingTo;
     Double latitude, longitude;
+    Boolean gaming, education, gym;
 
     public ModelUser() {
     }
 
-    public ModelUser(String name, String email, String search, String phone, String image, String cover, String uid, String onlineStatus, String typingTo, Double latitude, Double longitude) {
+    public ModelUser(String name, String email, String search, String phone, String image, String cover, String uid, String onlineStatus, String typingTo, Double latitude, Double longitude, Boolean gaming, Boolean education, Boolean gym) {
         this.name = name;
         this.email = email;
         this.search = search;
@@ -21,6 +22,9 @@ public class ModelUser {
         this.typingTo = typingTo;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.gaming = gaming;
+        this.education = education;
+        this.gym = gym;
     }
 
     public String getName() {
@@ -109,5 +113,29 @@ public class ModelUser {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public Boolean getGaming() {
+        return gaming;
+    }
+
+    public void setGaming(Boolean gaming) {
+        this.gaming = gaming;
+    }
+
+    public Boolean getEducation() {
+        return education;
+    }
+
+    public void setEducation(Boolean education) {
+        this.education = education;
+    }
+
+    public Boolean getGym() {
+        return gym;
+    }
+
+    public void setGym(Boolean gym) {
+        this.gym = gym;
     }
 }
