@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -113,6 +115,36 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     double latitude = (double) snapshot.child("latitude").getValue();
                     double longitude = (double) snapshot.child("longitude").getValue();
 
+                    boolean gym = snapshot.child("gym").getValue(Boolean.class);
+                    boolean gaming = snapshot.child("gaming").getValue(Boolean.class);
+                    boolean education = snapshot.child("education").getValue(Boolean.class);
+
+
+                    if (gym) {
+                        CircleOptions gymCircle = new CircleOptions()
+                                .center(new LatLng(44.45104334913945, 26.08245223728182))
+                                .radius(100) // Specify the desired radius in meters
+                                .strokeColor(Color.BLUE)
+                                .fillColor(Color.parseColor("#220000FF")); // Adjust the color and transparency as desired
+                        googleMap.addCircle(gymCircle);
+                    }
+                    if (gaming) {
+                        CircleOptions gamingCircle = new CircleOptions()
+                                .center(new LatLng(44.44650565733972, 26.107936547228938))
+                                .radius(100) // Specify the desired radius in meters
+                                .strokeColor(Color.YELLOW)
+                                .fillColor(Color.parseColor("#22FFFF00")); // Adjust the color and transparency as desired
+                        googleMap.addCircle(gamingCircle);
+                    }
+                    if (education) {
+                        CircleOptions educationCircle = new CircleOptions()
+                                .center(new LatLng(44.43567247321582, 26.102020634142356))
+                                .radius(100) // Specify the desired radius in meters
+                                .strokeColor(Color.GREEN)
+                                .fillColor(Color.parseColor("#2200FF00")); // Adjust the color and transparency as desired
+                        googleMap.addCircle(educationCircle);
+                    }
+
                     LatLng myLocation = new LatLng(latitude, longitude);
 //                    MarkerOptions userMarker = new MarkerOptions()
 //                            .position(myLocation)
@@ -130,7 +162,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                         return;
                     }
                     googleMap.setMyLocationEnabled(true);
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15));
+                    //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15));
+                    LatLng aseLocation = new LatLng(44.446971658053776, 26.096558689090617);
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(aseLocation,15));
                 }
             }
 

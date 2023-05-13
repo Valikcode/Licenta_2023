@@ -122,6 +122,10 @@ public class UsersFragment extends Fragment {
                 double currLat=snapshot.child(fUser.getUid()).child("latitude").getValue(Double.class);
                 double currLong=snapshot.child(fUser.getUid()).child("longitude").getValue(Double.class);
 
+                Boolean gym = snapshot.child(fUser.getUid()).child("gym").getValue(Boolean.class);
+                Boolean gaming = snapshot.child(fUser.getUid()).child("gaming").getValue(Boolean.class);
+                Boolean education = snapshot.child(fUser.getUid()).child("education").getValue(Boolean.class);
+
                 for(DataSnapshot ds: snapshot.getChildren()){
                     ModelUser modelUser = ds.getValue(ModelUser.class);
                     // Get latitude and longitude of the current user
@@ -130,7 +134,9 @@ public class UsersFragment extends Fragment {
                         // Calculate the distance between the current user and the user from the database
                         double distance = distance(currLat, currLong, ds.child("latitude").getValue(Double.class), ds.child("longitude").getValue(Double.class));
                         if (distance <= seekBar.getProgress() || seekBar.getProgress() == seekBar.getMax()) {
-                            usersList.add(modelUser);
+                            if ((!gym && !gaming && !education) || (gym && modelUser.getGym()) || (gaming && modelUser.getGaming()) || (education && modelUser.getEducation())) {
+                                usersList.add(modelUser);
+                            }
                         }
                     }
                     // Adapter
@@ -296,4 +302,3 @@ public class UsersFragment extends Fragment {
 
 
 }
-

@@ -454,12 +454,10 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
         for (int result : grantResults) {
             if (result != PackageManager.PERMISSION_GRANTED) {
                 allPermissionsGranted = false;
-                Toast.makeText(getContext(), "b", Toast.LENGTH_SHORT).show();
                 break;
             }
         }
         if (allPermissionsGranted) {
-            Toast.makeText(getContext(), "a", Toast.LENGTH_SHORT).show();
             // Permissions granted, handle accordingly
             if (requestCode == CAMERA_REQUEST_CODE) {
                 pickFromCamera();
