@@ -46,6 +46,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     // Firebase auth
     FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
 
     // Views
     BottomNavigationView navigationView;
@@ -65,6 +66,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Init
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
 
         // Init Location
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -86,7 +88,8 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void getCurrentLocation() {
         // Get the last known location of the device
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
@@ -101,7 +104,7 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Location location) {
                 // Got last known location. In some rare situation this can be null
-                if (location != null) {
+                if (location != null && firebaseUser != null) {
                     // Use the location to update the user`s current location
                     Double[] latLong = new Double[2];
                     latLong[0] = location.getLatitude();

@@ -40,6 +40,8 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
 
     private  static  final int MSG_TYPE_LEFT = 0;
     private  static  final int MSG_TYPE_RIGHT = 1;
+    private  static  final int MTP_TYPE_RIGHT = 2;
+    private  static  final int MTP_TYPE_LEFT = 3;
     Context context;
     List<ModelChat> chatList;
     String imageUrl;
@@ -59,17 +61,25 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         if(viewType == MSG_TYPE_RIGHT){
             View view = LayoutInflater.from(context).inflate(R.layout.row_chat_right, parent, false);
             return new MyHolder(view);
-        } else {
+        } else if (viewType == MSG_TYPE_LEFT) {
             View view = LayoutInflater.from(context).inflate(R.layout.row_chat_left, parent, false);
             return new MyHolder(view);
+        } else if (viewType == MTP_TYPE_RIGHT) {
+            View view = LayoutInflater.from(context).inflate(R.layout.meetup_chat_right,parent,false);
+            return  new MyHolder(view);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.meetup_chat_left,parent,false);
+            return  new MyHolder(view);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyHolder holder, int position) {
         // Get data
+        ModelChat chat = chatList.get(position);
         String message = chatList.get(position).getMessage();
         String timeStamp = chatList.get(position).getTimestamp();
+
 
 
         // Convert timestamp to hh:mm
@@ -78,12 +88,94 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         String time = DateFormat.format("HH:mm", calendar).toString();
 
         // Set data
-        holder.messageTv.setText(message);
-        holder.timeTv.setText(time);
+        //holder.messageTv.setText(message);
+        //holder.timeTv.setText(time);
         try{
             Picasso.get().load(imageUrl).placeholder(R.drawable.ic_default_img).into(holder.profileIv);
         } catch ( Exception e){
 
+        }
+
+        if(holder.getItemViewType() == MTP_TYPE_LEFT || holder.getItemViewType() == MTP_TYPE_RIGHT){
+            // Meetup Chat
+            String date = chat.getMeetupDate();
+            holder.dateTv.setText(date);
+            holder.messageTv.setText(message);
+            holder.timeTv.setText(time);
+
+            if(!chat.getMeetupStatus().equals("pending")){
+                if(holder.acceptBtn != null) holder.acceptBtn.setVisibility(View.GONE);
+                if(holder.declineBtn != null) holder.declineBtn.setVisibility(View.GONE);
+            }
+        } else {
+            holder.messageTv.setText(message);
+            holder.timeTv.setText(time);
+        }
+
+        if(holder.acceptBtn != null) {
+            holder.acceptBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String msgTimeStamp = chatList.get(holder.getAdapterPosition()).getTimestamp();
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chats");
+                    Query query = databaseReference.orderByChild("timestamp").equalTo(msgTimeStamp);
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                String chatId = dataSnapshot.getKey();
+
+                                DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chats").child(chatId);
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("meetupStatus","accepted");
+                                chatRef.updateChildren(hashMap);
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    Toast.makeText(context, "Meetup Accepted!", Toast.LENGTH_SHORT).show();
+                    holder.acceptBtn.setVisibility(View.GONE);
+                    holder.declineBtn.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        if(holder.declineBtn !=null) {
+            holder.declineBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String msgTimeStamp = chatList.get(holder.getAdapterPosition()).getTimestamp();
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chats");
+                    Query query = databaseReference.orderByChild("timestamp").equalTo(msgTimeStamp);
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                String chatId = dataSnapshot.getKey();
+
+                                DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chats").child(chatId);
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("meetupStatus","declined");
+                                chatRef.updateChildren(hashMap);
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    Toast.makeText(context, "Meetup Declined!", Toast.LENGTH_SHORT).show();
+                    holder.acceptBtn.setVisibility(View.GONE);
+                    holder.declineBtn.setVisibility(View.GONE);
+                }
+            });
         }
 
         // Longpress to show delete dialog
@@ -206,21 +298,30 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         // Get currently signed in user
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if(chatList.get(position).getSender().equals(firebaseUser.getUid())){
-            return MSG_TYPE_RIGHT;
+            if(chatList.get(position).getMeetupDate() != null ){
+                return MTP_TYPE_RIGHT;
+            } else return MSG_TYPE_RIGHT;
         } else {
-            return MSG_TYPE_LEFT;
+            if(chatList.get(position).getMeetupDate() != null){
+                return MTP_TYPE_LEFT;
+            } else return MSG_TYPE_LEFT;
         }
     }
 
     // View Holder class
     class MyHolder extends RecyclerView.ViewHolder{
 
-        // Views
+        // Views for message
         ImageView profileIv;
         TextView messageTv;
         TextView timeTv;
         TextView isSeenTv;
         LinearLayout messageLayout; // for click listener to show delete
+
+        // Views for meetup
+        TextView dateTv;
+        Button acceptBtn;
+        Button declineBtn;
 
         public MyHolder(@NonNull View itemView) {
             super(itemView);
@@ -231,6 +332,10 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             timeTv = itemView.findViewById(R.id.timeTv);
             isSeenTv = itemView.findViewById(R.id.isSeenTv);
             messageLayout = itemView.findViewById(R.id.messageLayout);
+
+            acceptBtn = itemView.findViewById(R.id.acceptButton);
+            declineBtn = itemView.findViewById(R.id.declineButton);
+            dateTv = itemView.findViewById(R.id.dateTv);
 
         }
     }

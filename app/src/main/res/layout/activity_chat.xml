@@ -89,6 +89,14 @@
       android:layout_height="40dp"
       android:background="@null"
       android:src="@drawable/ic_send"/>
+
+  <!-- Button: send message -->
+  <ImageButton
+      android:id="@+id/meetupBtn"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:background="@null"
+      android:src="@drawable/ic_meetup"/>
 </LinearLayout>
 
   </RelativeLayout>

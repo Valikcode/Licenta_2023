@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,9 +17,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +86,7 @@ public class ChatActivity extends AppCompatActivity {
     TextView nameTv, userStatusTv;
     EditText messageEt;
     ImageButton sendBtn;
+    ImageButton meetupBtn;
 
     // Uid from intent
     String hisUID;
@@ -109,6 +115,7 @@ public class ChatActivity extends AppCompatActivity {
         userStatusTv = findViewById(R.id.userStatusTv);
         messageEt = findViewById(R.id.messageEt);
         sendBtn = findViewById(R.id.sendBtn);
+        meetupBtn = findViewById(R.id.meetupBtn);
 
         // Request queue
         requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -216,6 +223,100 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        meetupBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Create a dialog
+                AppCompatDialog dialog = new AppCompatDialog(ChatActivity.this,R.style.MyDialogStyle);
+                dialog.setContentView(R.layout.dialog_meetup);
+
+                // Get references to dialog views
+                Spinner interestSpinner = dialog.findViewById(R.id.interestSpinner);
+                DatePicker datePicker = dialog.findViewById(R.id.datePicker);
+                datePicker.setCalendarViewShown(true);
+                Button sendButton = dialog.findViewById(R.id.sendButton);
+
+                // Create an ArrayAdapter with the values
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                // Get the interests of the current user
+                DatabaseReference currentUserRef = FirebaseDatabase.getInstance().getReference("Users").child(myUID);
+                currentUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            ModelUser currentUser = snapshot.getValue(ModelUser.class);
+                            List<String> currentUserInterests = currentUser.getInterests();
+
+                            // Get the interests of the other user
+                            DatabaseReference otherUserRef = FirebaseDatabase.getInstance().getReference("Users").child(hisUID);
+                            otherUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists()) {
+                                        ModelUser otherUser = snapshot.getValue(ModelUser.class);
+                                        List<String> otherUserInterests = otherUser.getInterests();
+
+                                        // Find the common interests between the two users
+                                        List<String> commonInterests = new ArrayList<>();
+                                        for (String interest : currentUserInterests) {
+                                            if (otherUserInterests.contains(interest)) {
+                                                commonInterests.add(interest);
+                                            }
+                                        }
+
+                                        // Add the common interests to the ArrayAdapter
+                                        adapter.addAll(commonInterests);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    // Handle error
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle error
+                    }
+                });
+
+                // Set the ArrayAdapter as the adapter for the Spinner
+                interestSpinner.setAdapter(adapter);
+
+                // Set up the dialog
+                dialog.show();
+
+                // Set an OnClickListener for the MeetUpButton
+                sendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Get the selected interest and date
+                        String selectedInterest = interestSpinner.getSelectedItem().toString();
+                        int day = datePicker.getDayOfMonth();
+                        int month = datePicker.getMonth() + 1; // Month is zero-based
+                        int year = datePicker.getYear();
+                        String timestamp = String.valueOf(System.currentTimeMillis());
+
+                        // Create a meetup object with the selected data
+                        ModelChat meetup = new ModelChat("Meetup",hisUID,myUID,timestamp,false,"locatie",selectedInterest,"pending",day + "/" + month + "/" + year);
+                        //ModelMeetup meetup = new ModelMeetup("Test",hisUID, myUID, timestamp, false, selectedInterest, "pending", day + "/" + month + "/" + year);
+                        Toast.makeText(ChatActivity.this, "" + meetup.toString(), Toast.LENGTH_SHORT).show();
+                        // TODO: Send the meetup object to the other user or process it as needed
+
+                        // Dismiss the dialog
+                        dialog.dismiss();
+
+                        sendMeetupRequest(meetup);
+                    }
+                });
+            }
+        });
+
         // Check edit text change listener
         messageEt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -241,6 +342,78 @@ public class ChatActivity extends AppCompatActivity {
         readMessages();
 
         seenMessage();
+    }
+
+    private void sendMeetupRequest(ModelChat meetup) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String timestamp = String.valueOf(System.currentTimeMillis());
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("sender", myUID);
+        hashMap.put("receiver", hisUID);
+        hashMap.put("message", meetup.getMeetupLocation() + " - " + meetup.getMeetupInterest());
+        hashMap.put("timestamp", timestamp);
+        hashMap.put("isSeen", false);
+
+        hashMap.put("meetupLocation", meetup.getMeetupLocation());
+        hashMap.put("meetupInterest", meetup.getMeetupInterest());
+        hashMap.put("meetupStatus", meetup.getMeetupStatus());
+        hashMap.put("meetupDate", meetup.getMeetupDate());
+
+        databaseReference.child("Chats").push().setValue(hashMap);
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users").child(myUID);
+        database.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ModelUser user = snapshot.getValue(ModelUser.class);
+
+                if(notify){
+                    sendNotification(hisUID, user.getName(), "New MeetUp!");
+                }
+                notify = false;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        // Create chatlist node/child in firebase database
+        DatabaseReference chatRef1 = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(myUID).child(hisUID);
+        chatRef1.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    chatRef1.child("id").setValue(hisUID);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        DatabaseReference chatRef2 = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(hisUID).child(myUID);
+        chatRef2.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    chatRef2.child("id").setValue(myUID);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     private void seenMessage() {
@@ -273,12 +446,12 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 chatList.clear();
-                for(DataSnapshot ds: snapshot.getChildren()){
-                    ModelChat chat = ds.getValue(ModelChat.class);
-                    if(chat.getReceiver().equals(myUID) && chat.getSender().equals(hisUID) ||
-                            chat.getReceiver().equals(hisUID) && chat.getSender().equals(myUID)){
-                        chatList.add(chat);
-                    }
+                for(DataSnapshot ds: snapshot.getChildren()) {
+                        ModelChat chat = ds.getValue(ModelChat.class);
+                        if (chat.getReceiver().equals(myUID) && chat.getSender().equals(hisUID) ||
+                                chat.getReceiver().equals(hisUID) && chat.getSender().equals(myUID)) {
+                            chatList.add(chat);
+                        }
 
                     // Adapter
                     adapterChat = new AdapterChat(ChatActivity.this, chatList, hisImage);
@@ -509,3 +682,4 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+

@@ -14,6 +14,19 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="MyDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">true</item> <!-- Remove dialog title -->
+        <item name="android:windowBackground">@android:color/white</item> <!-- Dialog background color -->
+        <item name="android:textColorPrimary">#000000</item> <!-- Primary text color -->
+        <item name="android:textColorSecondary">#666666</item> <!-- Secondary text color -->
+        <item name="android:buttonStyle">@style/MyButtonStyle</item>
+    </style>
+
+    <style name="MyButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item> <!-- Button text color -->
+        <item name="android:background">#88304e</item> <!-- Button background color -->
+    </style>
+
     <!-- For activities containing toolbar -->
     <!-- Theme Without ActionBar -->
     <style name="AppThemeNo" parent="Theme.AppCompat.Light.NoActionBar">

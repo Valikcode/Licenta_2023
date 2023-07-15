@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.AdapterChatlist;
@@ -110,14 +111,14 @@ public class ChatListFragment extends Fragment {
                             break;
                         }
                     }
-                    // Adapter
-                    adapterChatlist = new AdapterChatlist(getContext(), userList);
-                    // SetAdapter
-                    recyclerView.setAdapter(adapterChatlist);
-                    // Set last message
-                    for(int i = 0; i<userList.size(); i++){
-                        lastMessage(userList.get(i).getUid());
-                    }
+                }
+                // Adapter
+                adapterChatlist = new AdapterChatlist(getContext(), userList);
+                // SetAdapter
+                recyclerView.setAdapter(adapterChatlist);
+                // Set last message
+                for(int i = 0; i<userList.size(); i++){
+                    lastMessage(userList.get(i).getUid());
                 }
             }
 

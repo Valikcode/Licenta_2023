@@ -9,6 +9,11 @@ public class ModelChat {
     String timestamp;
     boolean isSeen;
 
+    String meetupLocation;
+    String meetupInterest;
+    String meetupStatus;
+    String meetupDate;
+
     public ModelChat() {}
 
     public ModelChat(String message, String receiver, String sender,
@@ -18,6 +23,18 @@ public class ModelChat {
         this.sender = sender;
         this.timestamp = timestamp;
         this.isSeen = isSeen;
+    }
+
+    public ModelChat(String message, String receiver, String sender, String timestamp, boolean isSeen, String location, String interest, String status, String date) {
+        this.message = message;
+        this.receiver = receiver;
+        this.sender = sender;
+        this.timestamp = timestamp;
+        this.isSeen = isSeen;
+        this.meetupLocation = location;
+        this.meetupInterest = interest;
+        this.meetupStatus = status;
+        this.meetupDate = date;
     }
 
     public String getMessage() {
@@ -60,5 +77,37 @@ public class ModelChat {
     @PropertyName("isSeen")
     public void setSeen(boolean seen) {
         isSeen = seen;
+    }
+
+    public String getMeetupLocation() {
+        return meetupLocation;
+    }
+
+    public void setMeetupLocation(String meetupLocation) {
+        this.meetupLocation = meetupLocation;
+    }
+
+    public String getMeetupInterest() {
+        return meetupInterest;
+    }
+
+    public void setMeetupInterest(String meetupInterest) {
+        this.meetupInterest = meetupInterest;
+    }
+
+    public String getMeetupStatus() {
+        return meetupStatus;
+    }
+
+    public void setMeetupStatus(String meetupStatus) {
+        this.meetupStatus = meetupStatus;
+    }
+
+    public String getMeetupDate() {
+        return meetupDate;
+    }
+
+    public void setMeetupDate(String meetupDate) {
+        this.meetupDate = meetupDate;
     }
 }

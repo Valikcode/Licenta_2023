@@ -134,7 +134,8 @@ public class UsersFragment extends Fragment {
                         // Calculate the distance between the current user and the user from the database
                         double distance = distance(currLat, currLong, ds.child("latitude").getValue(Double.class), ds.child("longitude").getValue(Double.class));
                         if (distance <= seekBar.getProgress() || seekBar.getProgress() == seekBar.getMax()) {
-                            if ((!gym && !gaming && !education) || (gym && modelUser.getGym()) || (gaming && modelUser.getGaming()) || (education && modelUser.getEducation())) {
+                            if ((!gym && !gaming && !education) || (gym && modelUser.getGym()) || (gaming && modelUser.getGaming())
+                                    || (education && modelUser.getEducation())) {
                                 usersList.add(modelUser);
                             }
                         }

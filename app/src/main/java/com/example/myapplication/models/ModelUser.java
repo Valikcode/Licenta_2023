@@ -1,5 +1,8 @@
 package com.example.myapplication.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ModelUser {
 
      // Use same name as in firebase database
@@ -137,5 +140,13 @@ public class ModelUser {
 
     public void setGym(Boolean gym) {
         this.gym = gym;
+    }
+
+    public List<String> getInterests(){
+        List<String> list = new ArrayList<>();
+        if(gaming == true) list.add("Gaming");
+        if(education == true) list.add("Education");
+        if(gym == true) list.add("Gym");
+        return list;
     }
 }
