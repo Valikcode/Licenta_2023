@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -36,6 +38,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.models.ModelChat;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -53,7 +56,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ProfileFragment extends Fragment {
 
@@ -73,6 +78,7 @@ public class ProfileFragment extends Fragment {
     TextView nameTv, emailTv, phoneTv;
     FloatingActionButton fab;
     CheckBox gamingCheckbox, educationCheckbox, gymCheckbox;
+    RecyclerView meetupRv;
 
     // Progress dialog
     ProgressDialog pd;
@@ -125,6 +131,9 @@ public class ProfileFragment extends Fragment {
         gamingCheckbox = view.findViewById(R.id.gaming_checkbox);
         educationCheckbox = view.findViewById(R.id.education_checkbox);
         gymCheckbox = view.findViewById(R.id.gym_checkbox);
+        meetupRv = view.findViewById(R.id.meetupsRv);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        meetupRv.setLayoutManager(layoutManager);
 
         // Init progress dialog
         pd = new ProgressDialog(getActivity());
@@ -207,6 +216,34 @@ public class ProfileFragment extends Fragment {
                         }
                     });
 
+                    // Load accepted meetups
+                    List<ModelChat> acceptedMeetups = new ArrayList<>();
+                    DatabaseReference chatReference = FirebaseDatabase.getInstance().getReference("Chats");
+                    chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot chatSnapshot : snapshot.getChildren()) {
+                                ModelChat chat = chatSnapshot.getValue(ModelChat.class);
+                                if(chat != null && chat.getMeetupDate() != null){
+                                    if(chat.getReceiver().equals(user.getUid()) && chat.getMeetupStatus().equals("accepted")){
+                                        acceptedMeetups.add(chat);
+                                    }
+                                }
+                            }
+                            MeetupAdapter adapter = new MeetupAdapter(acceptedMeetups);
+                            meetupRv.setAdapter(adapter);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+
+                    // adapter.notifyDataSetChanged();
+                    // listView.setAdapter(adapter);
+
                 }
             }
 
@@ -228,6 +265,57 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+
+    public class MeetupAdapter extends RecyclerView.Adapter<MeetupAdapter.MeetupViewHolder> {
+
+        private List<ModelChat> meetupList;
+
+        public MeetupAdapter(List<ModelChat> meetupList) {
+            this.meetupList = meetupList;
+        }
+
+        @NonNull
+        @Override
+        public MeetupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_meetup, parent, false);
+            return new MeetupViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MeetupViewHolder holder, int position) {
+            ModelChat meetup = meetupList.get(position);
+            // Bind the meetup data to the ViewHolder
+            holder.bindMeetup(meetup);
+        }
+
+        @Override
+        public int getItemCount() {
+            return meetupList.size();
+        }
+
+        public class MeetupViewHolder extends RecyclerView.ViewHolder {
+            private TextView dateTv;
+            private TextView messageTv;
+            private TextView timeTv;
+
+            public MeetupViewHolder(@NonNull View itemView) {
+                super(itemView);
+                dateTv = itemView.findViewById(R.id.dateTv);
+                messageTv = itemView.findViewById(R.id.messageTv);
+                timeTv = itemView.findViewById(R.id.timeTv);
+            }
+
+            public void bindMeetup(ModelChat meetup) {
+                String date = meetup.getMeetupDate();
+                String location = meetup.getMeetupLocation();
+                String interest = meetup.getMeetupInterest();
+
+                dateTv.setText(date);
+                messageTv.setText(location);
+                timeTv.setText(interest);
+            }
+        }
+    }
     private boolean checkStoragePermission() {
         // Check if storage permission is enabled or not
         // Return true if enabled
@@ -407,43 +495,7 @@ public class ProfileFragment extends Fragment {
         builder.create().show();
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        // This method is called when the user presses Allow or Deny from permission req dialog
-//        // Here we will handle permission cases ( allowed & denied )
-//
-//        switch (requestCode){
-//            case CAMERA_REQUEST_CODE:{
-//                // Picking from camera, first check if camera and storage permission are allowed or not
-//                if(grantResults.length > 0){
-//                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-//                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-//                    if(cameraAccepted && writeStorageAccepted){
-//                        // Permisions enabled
-//                        pickFromCamera();
-//                    } else{
-//                        // Permissions denied
-//                        Toast.makeText(getActivity(), "Please enable camera & storage permissions", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//            break;
-//            case STORAGE_REQUEST_CODE:{
-//                // Picking from gallery, first check if storage permission are allowed or not
-//                if(grantResults.length > 0){
-//                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-//                    if(writeStorageAccepted){
-//                        // Permisions enabled
-//                        pickFromGallery();
-//                    } else{
-//                        // Permissions denied
-//                        Toast.makeText(getActivity(), "Please enable storage permissions", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//            break;
-//        }
-//    }
+
 @Override
 public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -598,6 +650,10 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
         // Inflating menu
         inflater.inflate(R.menu.menu_main, menu);
         super.onCreateOptionsMenu(menu, inflater);
+
+        // Get the search item and show it
+        MenuItem searchMenuItem = menu.findItem(R.id.action_profile);
+        searchMenuItem.setVisible(false);
     }
 
     // Handle menu item click

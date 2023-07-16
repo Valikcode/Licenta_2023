@@ -81,7 +81,6 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         String timeStamp = chatList.get(position).getTimestamp();
 
 
-
         // Convert timestamp to hh:mm
         Calendar calendar = Calendar.getInstance(Locale.ENGLISH);
         calendar.setTimeInMillis(Long.parseLong(timeStamp));
@@ -102,10 +101,24 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             holder.dateTv.setText(date);
             holder.messageTv.setText(message);
             holder.timeTv.setText(time);
+            String meetupStatus = chat.getMeetupStatus();
 
-            if(!chat.getMeetupStatus().equals("pending")){
+
+
+            if(!meetupStatus.equals("pending")){
                 if(holder.acceptBtn != null) holder.acceptBtn.setVisibility(View.GONE);
                 if(holder.declineBtn != null) holder.declineBtn.setVisibility(View.GONE);
+
+                if(holder.statusTv != null){
+                    holder.statusTv.setText(meetupStatus);
+                    if (meetupStatus.equals("accepted")) {
+                        holder.statusTv.setTextColor(Color.GREEN);
+                        holder.statusTv.setTypeface(null, Typeface.BOLD);
+                    } else if (meetupStatus.equals("declined")) {
+                        holder.statusTv.setTextColor(Color.RED);
+                        holder.statusTv.setTypeface(null, Typeface.BOLD);
+                    }
+                }
             }
         } else {
             holder.messageTv.setText(message);
@@ -322,6 +335,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
         TextView dateTv;
         Button acceptBtn;
         Button declineBtn;
+        TextView statusTv;
 
         public MyHolder(@NonNull View itemView) {
             super(itemView);
@@ -336,6 +350,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyHolder> {
             acceptBtn = itemView.findViewById(R.id.acceptButton);
             declineBtn = itemView.findViewById(R.id.declineButton);
             dateTv = itemView.findViewById(R.id.dateTv);
+            statusTv = itemView.findViewById(R.id.isAcceptedTv);
 
         }
     }

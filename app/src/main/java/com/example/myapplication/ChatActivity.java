@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -39,6 +40,7 @@ import com.example.myapplication.models.ModelUser;
 import com.example.myapplication.notifications.Data;
 import com.example.myapplication.notifications.Sender;
 import com.example.myapplication.notifications.Token;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -61,6 +63,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 public class ChatActivity extends AppCompatActivity {
@@ -296,26 +300,78 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         // Get the selected interest and date
-                        String selectedInterest = interestSpinner.getSelectedItem().toString();
+                        String selectedInterest = String.valueOf(interestSpinner.getSelectedItem());
                         int day = datePicker.getDayOfMonth();
                         int month = datePicker.getMonth() + 1; // Month is zero-based
                         int year = datePicker.getYear();
                         String timestamp = String.valueOf(System.currentTimeMillis());
 
-                        // Create a meetup object with the selected data
-                        ModelChat meetup = new ModelChat("Meetup",hisUID,myUID,timestamp,false,"locatie",selectedInterest,"pending",day + "/" + month + "/" + year);
-                        //ModelMeetup meetup = new ModelMeetup("Test",hisUID, myUID, timestamp, false, selectedInterest, "pending", day + "/" + month + "/" + year);
-                        Toast.makeText(ChatActivity.this, "" + meetup.toString(), Toast.LENGTH_SHORT).show();
-                        // TODO: Send the meetup object to the other user or process it as needed
+                        List<LatLng> potentialLocations = new ArrayList<>();
+                        final LatLng[] senderLocation = new LatLng[1];
+                        final LatLng[] receiverLocation = new LatLng[1];
 
-                        // Dismiss the dialog
-                        dialog.dismiss();
+                        getUserLocation(myUID, new UserCallback() {
+                            @Override
+                            public void onUserLoaded(LatLng userLatLng) {
+                                senderLocation[0]=userLatLng;
 
-                        sendMeetupRequest(meetup);
+                            }
+                        });
+
+                        getUserLocation(hisUID, new UserCallback() {
+                            @Override
+                            public void onUserLoaded(LatLng userLatLng) {
+                                receiverLocation[0]=userLatLng;
+                            }
+                        });
+
+                        getLocations(selectedInterest, new LocationCallback() {
+                            @Override
+                            public void onLocationsLoaded(List<LatLng> locations) {
+                                if(locations != null){
+                                    potentialLocations.clear();
+                                    potentialLocations.addAll(locations);
+
+                                    LatLng recommendedLocation = null;
+                                    double minDistanceSender = Double.MAX_VALUE;
+                                    double minDistanceReceiver = Double.MAX_VALUE;
+
+                                    for(LatLng location : potentialLocations) {
+                                        double distanceToSender = calculateDistance(senderLocation[0], location);
+                                        double distanceToReceiver = calculateDistance(receiverLocation[0],location);
+
+                                        if (distanceToSender < minDistanceSender && distanceToReceiver < minDistanceReceiver) {
+                                            minDistanceSender = distanceToSender;
+                                            minDistanceReceiver = distanceToReceiver;
+                                            recommendedLocation = new LatLng(location.latitude, location.longitude);
+                                        }
+                                    }
+                                    final String[] denumireLocatieRecomandata = new String[1];
+
+                                    getLocationNameFromFirebase(recommendedLocation, selectedInterest, new LocationNameCallback() {
+                                        @Override
+                                        public void onLocationNameReceived(String locationName) {
+                                            denumireLocatieRecomandata[0] = locationName;
+                                            denumireLocatieRecomandata.toString();
+
+                                            ModelChat meetup = new ModelChat("Meetup",hisUID,myUID,timestamp,false,denumireLocatieRecomandata[0],selectedInterest,"pending",day + "/" + month + "/" + year);
+                                            //ModelMeetup meetup = new ModelMeetup("Test",hisUID, myUID, timestamp, false, selectedInterest, "pending", day + "/" + month + "/" + year);
+                                            Toast.makeText(ChatActivity.this, "" + meetup.toString(), Toast.LENGTH_SHORT).show();
+
+                                            // Dismiss the dialog
+                                            dialog.dismiss();
+
+                                            sendMeetupRequest(meetup);
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     }
                 });
             }
         });
+
 
         // Check edit text change listener
         messageEt.addTextChangedListener(new TextWatcher() {
@@ -342,6 +398,117 @@ public class ChatActivity extends AppCompatActivity {
         readMessages();
 
         seenMessage();
+    }
+
+    private LatLng getUserLocation(String UID, UserCallback callback){
+        DatabaseReference userLocation = FirebaseDatabase.getInstance().getReference("Users");
+        userLocation.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot userSnapshot : snapshot.getChildren()){
+                    if(userSnapshot.child("uid").getValue(String.class).equals(UID)){
+                        LatLng locatie = new LatLng(userSnapshot.child("latitude").getValue(Double.class),userSnapshot.child("longitude").getValue(Double.class));
+                        callback.onUserLoaded(locatie);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return null;
+    }
+
+    private List<LatLng> getLocations(String interest, LocationCallback callback){
+        DatabaseReference locationsReference = FirebaseDatabase.getInstance().getReference("Locations").child(interest);
+        locationsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<LatLng> listaLocatii = new ArrayList<>();
+                for(DataSnapshot locationSnapshot : snapshot.getChildren()){
+                    LatLng locatie = new LatLng(locationSnapshot.child("Lat").getValue(Double.class), locationSnapshot.child("Long").getValue(Double.class));
+                    listaLocatii.add(locatie);
+                }
+                callback.onLocationsLoaded(listaLocatii);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error
+                callback.onLocationsLoaded(null);
+            }
+
+        });
+        return null;
+    }
+
+    public interface LocationCallback {
+        void onLocationsLoaded(List<LatLng> locations);
+    }
+
+    public interface UserCallback {
+        void onUserLoaded(LatLng userLatLng);
+    }
+
+    public interface LocationNameCallback {
+        void onLocationNameReceived(String locationName);
+    }
+
+    private String getLocationNameFromFirebase(LatLng recommendedLocation, String category, LocationNameCallback callback) {
+        DatabaseReference locationsRef = FirebaseDatabase.getInstance().getReference("Locations").child(category);
+        locationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String locationName = null;
+                boolean locationFound = false;
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    double latitude = dataSnapshot.child("Lat").getValue(Double.class);
+                    double longitude = dataSnapshot.child("Long").getValue(Double.class);
+                    locationName = dataSnapshot.child("Denumire").getValue(String.class);
+
+                    // Compare the latitude and longitude within a certain threshold
+                    double threshold = 0.0001; // Adjust this value based on your desired precision
+
+                    if (Math.abs(latitude - recommendedLocation.latitude) < threshold
+                            && Math.abs(longitude - recommendedLocation.longitude) < threshold) {
+                        locationFound = true;
+                        break;
+                    }
+                }
+                if (locationFound) {
+                    callback.onLocationNameReceived(locationName);
+                } else {
+                    callback.onLocationNameReceived(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return null;
+    }
+
+
+    private static final int EARTH_RADIUS = 6371; // Earth's radius in kilometers
+
+    private double calculateDistance(LatLng startLatLng, LatLng endLatLng) {
+        double startLat = Math.toRadians(startLatLng.latitude);
+        double endLat = Math.toRadians(endLatLng.latitude);
+        double latDiff = Math.toRadians(endLatLng.latitude - startLatLng.latitude);
+        double lngDiff = Math.toRadians(endLatLng.longitude - startLatLng.longitude);
+
+        double a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2)
+                + Math.cos(startLat) * Math.cos(endLat)
+                * Math.sin(lngDiff / 2) * Math.sin(lngDiff / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = EARTH_RADIUS * c;
+
+        return distance; // Distance in kilometers
     }
 
     private void sendMeetupRequest(ModelChat meetup) {
@@ -667,6 +834,9 @@ public class ChatActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         // Hide searchView, as we dont need it here
         menu.findItem(R.id.action_search).setVisible(false);
+
+        MenuItem searchMenuItem = menu.findItem(R.id.action_profile);
+        searchMenuItem.setVisible(false);
 
         return super.onCreateOptionsMenu(menu);
     }

@@ -4,12 +4,16 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -27,6 +31,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +42,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
@@ -119,30 +127,109 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     boolean gaming = snapshot.child("gaming").getValue(Boolean.class);
                     boolean education = snapshot.child("education").getValue(Boolean.class);
 
-
                     if (gym) {
-                        CircleOptions gymCircle = new CircleOptions()
-                                .center(new LatLng(44.45104334913945, 26.08245223728182))
-                                .radius(100) // Specify the desired radius in meters
-                                .strokeColor(Color.BLUE)
-                                .fillColor(Color.parseColor("#220000FF")); // Adjust the color and transparency as desired
-                        googleMap.addCircle(gymCircle);
+                        DatabaseReference gymRef = FirebaseDatabase.getInstance().getReference("Locations").child("Gym");
+                        gymRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for(DataSnapshot gymSnapshot : snapshot.getChildren()) {
+                                    LatLng location = new LatLng(gymSnapshot.child("Lat").getValue(Double.class), gymSnapshot.child("Long").getValue(Double.class));
+                                    String name = gymSnapshot.child("Denumire").getValue(String.class);
+
+                                    MarkerOptions markerOptions = new MarkerOptions()
+                                            .position(location)
+                                            .title(name)
+                                            .icon(bitmapDescriptorFromVector(getActivity(), R.drawable.gym));
+                                    Marker marker = googleMap.addMarker(markerOptions);
+                                    marker.setTag(location);
+
+                                    googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                        @Override
+                                        public boolean onMarkerClick(@NonNull Marker clickedMarker) {
+                                            if(clickedMarker.equals(marker)) {
+                                                marker.showInfoWindow();
+                                            }
+                                            return false;
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
+
                     if (gaming) {
-                        CircleOptions gamingCircle = new CircleOptions()
-                                .center(new LatLng(44.44650565733972, 26.107936547228938))
-                                .radius(100) // Specify the desired radius in meters
-                                .strokeColor(Color.YELLOW)
-                                .fillColor(Color.parseColor("#22FFFF00")); // Adjust the color and transparency as desired
-                        googleMap.addCircle(gamingCircle);
+                        DatabaseReference gamingRef = FirebaseDatabase.getInstance().getReference("Locations").child("Gaming");
+                        gamingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for(DataSnapshot gymSnapshot : snapshot.getChildren()) {
+                                    LatLng location = new LatLng(gymSnapshot.child("Lat").getValue(Double.class), gymSnapshot.child("Long").getValue(Double.class));
+                                    String name = gymSnapshot.child("Denumire").getValue(String.class);
+
+                                    MarkerOptions markerOptions = new MarkerOptions()
+                                            .position(location)
+                                            .title(name)
+                                            .icon(bitmapDescriptorFromVector(getActivity(), R.drawable.gaming));
+                                    Marker marker = googleMap.addMarker(markerOptions);
+                                    marker.setTag(location);
+
+                                    googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                        @Override
+                                        public boolean onMarkerClick(@NonNull Marker clickedMarker) {
+                                            if(clickedMarker.equals(marker)) {
+                                                marker.showInfoWindow();
+                                            }
+                                            return false;
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
+
                     if (education) {
-                        CircleOptions educationCircle = new CircleOptions()
-                                .center(new LatLng(44.43567247321582, 26.102020634142356))
-                                .radius(100) // Specify the desired radius in meters
-                                .strokeColor(Color.GREEN)
-                                .fillColor(Color.parseColor("#2200FF00")); // Adjust the color and transparency as desired
-                        googleMap.addCircle(educationCircle);
+                        DatabaseReference gamingRef = FirebaseDatabase.getInstance().getReference("Locations").child("Education");
+                        gamingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for(DataSnapshot gymSnapshot : snapshot.getChildren()) {
+                                    LatLng location = new LatLng(gymSnapshot.child("Lat").getValue(Double.class), gymSnapshot.child("Long").getValue(Double.class));
+                                    String name = gymSnapshot.child("Denumire").getValue(String.class);
+
+                                    MarkerOptions markerOptions = new MarkerOptions()
+                                            .position(location)
+                                            .title(name)
+                                            .icon(bitmapDescriptorFromVector(getActivity(), R.drawable.education));
+                                    Marker marker = googleMap.addMarker(markerOptions);
+                                    marker.setTag(location);
+
+                                    googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                        @Override
+                                        public boolean onMarkerClick(@NonNull Marker clickedMarker) {
+                                            if(clickedMarker.equals(marker)) {
+                                                marker.showInfoWindow();
+                                            }
+                                            return false;
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
 
                     LatLng myLocation = new LatLng(latitude, longitude);
@@ -177,4 +264,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         googleMap.addMarker(new MarkerOptions().position(location).title("ASE"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
     }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        if(context != null) {
+            Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+            vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+            Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            vectorDrawable.draw(canvas);
+            return BitmapDescriptorFactory.fromBitmap(bitmap);
+        }
+        return null;
+    }
 }
+

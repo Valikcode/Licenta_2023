@@ -92,6 +92,7 @@
         android:textColor="@color/black"
         android:textSize="20dp"/>
     <LinearLayout
+        android:id="@+id/linearLayoutCheckboxes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/scrollView"
@@ -125,7 +126,11 @@
 
     </LinearLayout>
 
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/meetupsRv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/linearLayoutCheckboxes"/>
 
     <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
