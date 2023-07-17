@@ -43,13 +43,16 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Actionbar and its title
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("Create Account");
+        // Ascund Action Bar de pe Splah Screen
+        getSupportActionBar().hide();
 
-        // Enable Back Button
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
+//        // Actionbar and its title
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setTitle("Create Account");
+
+//        // Enable Back Button
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setDisplayShowHomeEnabled(true);
 
         // Views init
         editTextEmail = findViewById(R.id.editTextEmail);

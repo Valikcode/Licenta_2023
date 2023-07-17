@@ -14,10 +14,11 @@
         android:layout_height="wrap_content"
         android:text="@string/textViewLogin"
         android:textAlignment="center"
-        android:textColor="#000000"
+        android:textColor="@color/white"
+        android:fontFamily="@font/alata"
         android:textSize="24sp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"/>
+        android:layout_marginTop="100dp"/>
 
     <!-- EditText: Input Email -->
     <com.google.android.material.textfield.TextInputLayout
@@ -25,8 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
-        android:layout_marginTop="10dp"
-        android:padding="10dp"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="30dp"
         tools:layout_editor_absoluteX="0dp">
 
         <EditText
@@ -51,8 +52,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textInputLayout"
-
-        android:padding="10dp"
+        android:paddingTop="16dp"
+        android:paddingHorizontal="30dp"
         app:passwordToggleEnabled="true">
 
         <EditText
@@ -71,13 +72,19 @@
             app:layout_constraintVertical_bias="0.05" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Button: Register Button -->
+    <!-- Button: LogIn Button -->
     <Button
         android:id="@+id/buttonLoginSec"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/buttonLogin"
-        android:layout_below="@+id/textInputLayout2" />
+        android:textColor="@color/black"
+        android:layout_below="@+id/textInputLayout2"
+        android:paddingHorizontal="60dp"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="@color/white"
+        />
 
 
     <!-- TextView: Show forgotPass Dialog -->
@@ -87,6 +94,7 @@
         android:layout_height="wrap_content"
         android:text="@string/textViewForgotPass"
         android:textAlignment="center"
+        android:textColor="#bcbcbc"
         android:layout_below="@+id/buttonLoginSec" />
 
     <!-- TextView: Click to go to registerActivity -->
@@ -96,16 +104,16 @@
         android:layout_height="wrap_content"
         android:text="@string/textViewReigsterNow"
         android:textAlignment="center"
+        android:textColor="#bcbcbc"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="30dp"/>
-
-
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="430dp"
         android:src="@drawable/bottom_background"
         android:layout_centerHorizontal="true"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitEnd"
+        android:layout_alignParentBottom="true"/>
+
 </RelativeLayout>

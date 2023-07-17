@@ -48,16 +48,16 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
 
-
         // Ascund Action Bar de pe Splah Screen
-        //getSupportActionBar().hide();
-        // Actionbar and its title
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("Login");
+        getSupportActionBar().hide();
 
-        // Enable Back Button
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
+//        // Actionbar and its title
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setTitle("Login");
+
+//        // Enable Back Button
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setDisplayShowHomeEnabled(true);
 
         // Initialize the FirebaseAuth instance
         mAuth = FirebaseAuth.getInstance();

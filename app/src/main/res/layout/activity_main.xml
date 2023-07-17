@@ -6,26 +6,33 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <!-- ImageView: Backround -->
     <ImageView
+        android:id="@+id/backgroudImg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-100dp"
         android:src="@drawable/top_background"
-        android:layout_centerHorizontal="true"/>
+        android:adjustViewBounds="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop">
+
+    </ImageView>
 
     <!-- ImageView: Logo -->
     <ImageView
         android:id="@+id/LogoMain"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:src="@drawable/buddylogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true"
         android:padding="10dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="100dp"
+        android:src="@drawable/buddylogo" />
 
     <!-- TextView: Find A Buddy! -->
     <TextView
+        android:id="@+id/findABuddy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/LogoMain"
@@ -35,91 +42,62 @@
         android:textColor="@color/white"
         android:textSize="30sp" />
 
-    <RelativeLayout
+
+    <!-- Button: Main Login -->
+    <Button
+        android:id="@+id/buttonLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="150dp"
+        android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
+        android:fontFamily="@font/alata"
+        android:text="@string/buttonLogin"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:layout_below="@+id/findABuddy"
+        android:textSize="26sp"
+        android:paddingLeft="50dp"
+        android:paddingRight="60dp"/>
+
+    <!-- View: Space -->
+    <View
+        android:id="@+id/viewSpace"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="20dp">
+        android:layout_height="2dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginTop="70dp"
+        android:background="#707070"
+        android:layout_below="@+id/buttonLogin"/>
 
-        <!-- Button: Main Login -->
-        <Button
-            android:id="@+id/buttonLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="400dp"
-            android:drawableLeft="@drawable/ic_baseline_vpn_key_24"
-            android:paddingLeft="120dp"
-            android:paddingRight="130dp"
-            android:fontFamily="@font/alata"
-            android:text="@string/buttonLogin"
-            android:textAlignment="center"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="23sp" />
+    <!-- Button: Google LogIn -->
+    <Button
+        android:id="@+id/buttonLoginGoogle"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:text="@string/buttonGoogleLogin"
+        android:backgroundTint="#bcbcbc"
+        android:textAllCaps="false"
+        android:drawableLeft="@drawable/google"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_below="@+id/viewSpace"
+        android:layout_centerHorizontal="true"
+        android:textColor="#636363"/>
 
-        <!-- View: Space -->
-        <View
-            android:id="@+id/viewSpace"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
-            android:layout_marginTop="100dp"
-            android:background="#707070"
-            android:layout_below="@+id/buttonLogin"/>
-
-        <LinearLayout
-            android:id="@+id/linearLayoutLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_below="@+id/viewSpace">
-
-            <!-- Button: Google LogIn -->
-            <Button
-                android:id="@+id/buttonLoginGoogle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/buttonGoogleLogin"
-                android:backgroundTint="#bcbcbc"
-                android:textAllCaps="false"
-                android:drawableLeft="@drawable/google"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#636363"
-                android:layout_marginStart="100dp"
-                android:layout_marginEnd="100dp"/>
-
-
-        </LinearLayout>
-
-        <!-- TextView: Register -->
-        <TextView
-            android:id="@+id/textViewRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayoutLogin"
-            android:text="@string/textViewReigsterNow"
-            android:layout_marginTop="10dp"
-            android:textAlignment="center"
-            android:textColor="#04336a" />
-
-<!--        &lt;!&ndash; Button: Main Create Account &ndash;&gt;-->
-<!--        <Button-->
-<!--            android:id="@+id/buttonRegisterMain"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_alignParentBottom="true"-->
-<!--            android:layout_marginBottom="50dp"-->
-<!--            android:text="@string/buttonRegister"-->
-<!--            android:textAlignment="center"-->
-<!--            android:textAllCaps="false"-->
-<!--            android:textColor="@color/white"-->
-<!--            android:textSize="23sp"/>-->
-
-    </RelativeLayout>
+    <!-- TextView: Register -->
+    <TextView
+        android:id="@+id/textViewRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonLoginGoogle"
+        android:text="@string/textViewReigsterNow"
+        android:layout_marginTop="10dp"
+        android:textAlignment="center"
+        android:textColor="#04336a" />
 
 
 
